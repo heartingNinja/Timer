@@ -1,0 +1,104 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+namespace Ignis
+{
+    public class EndLevel : MonoBehaviour
+    {
+        public GameObject loadingScreen; //Add to script to empty object
+        public GameObject enterLevel;
+        public GameObject simpleUIPause;
+        public GameObject startPause;
+        //public GameObject timerNonStatic;
+        public GameObject timerTest;
+        public Slider slider; // add slider to UI to show progress
+        public Text progressText; // text % for progress
+        int levelGenerate;
+     
+        bool activateScene = false;
+        public void Start()
+        {
+            levelGenerate = Random.Range(1, 2);
+            //timerTest = GameObject.Find("TimerTest");
+        }
+
+        public void Update()
+        {
+            FireTestCheck();
+        }
+     
+        public void LoadLevel(int sceneIndex) // add to button to start loading scene
+        {
+            StartCoroutine(LoadAsynchronously(sceneIndex));
+        }
+
+        IEnumerator LoadAsynchronously(int sceneIndex)
+        {
+
+            yield return null;
+                    
+            AsyncOperation operation = SceneManager.LoadSceneAsync(sceneIndex); // scene to load from build index #
+            operation.allowSceneActivation = false; // set scene as not active
+
+            loadingScreen.SetActive(true); // Show UI for loading
+           
+
+            while (!operation.isDone) //before load is finished loading
+            {
+                float progress = Mathf.Clamp01(operation.progress / .9f); // makes loading bar set to 100%
+                slider.value = progress; // sets slider value
+
+                progressText.text = progress * 100f + "%"; // text for value, set text in UI
+
+                if (progress >= 1f)
+                {
+                    enterLevel.SetActive(true); // Show UI for enter level
+                    if (activateScene == true)
+                    {
+                        timerTest.SetActive(true);
+                        operation.allowSceneActivation = true; //Activate the Scene
+                       // timerNonStatic.SetActive(true); // start timer
+                    }
+                }
+
+                yield return null;
+            }
+        }
+
+        public void ActivateScene() //set a button for on click to use in UI
+        {
+            activateScene = true;
+        }
+
+  
+        private void FireTestCheck()
+        {
+           
+            GameObject[] taggedObjects = GameObject.FindGameObjectsWithTag("Fire");
+            bool allAreTrue = false;
+
+                foreach (GameObject obj in taggedObjects)
+                {
+                    if (obj.GetComponent<FlammableObject>().onFire)
+                    {
+                    allAreTrue = true;
+                    Debug.Log("At least one is ON");
+                    break;
+                    }              
+                }
+
+                if (allAreTrue == false)
+                {
+                    simpleUIPause.SetActive(true);
+                    startPause.SetActive(false);
+                    Debug.Log("All are OFF");
+                   // timerNonStatic.SetActive(false); // stop timer
+                    timerTest.SetActive(false);
+                    LoadLevel(2);                  
+                }              
+        }
+    }
+}
