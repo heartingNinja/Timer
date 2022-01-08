@@ -1,0 +1,214 @@
+using System.Collections;
+using System.Collections.Generic;
+using HurricaneVR.Framework.Core.Player;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
+
+namespace Ignis
+{
+    public class Timer : MonoBehaviour
+    {
+        public static float timeValue = 60;
+        public Text timeText;
+        public Text timeTextArm;
+        public float startTimeValue = 0;
+        public Text totalTime;
+
+        public float highScore = 0;
+        public Text highScoreText;
+
+        public GameObject loadingScreen; //Add to script to empty object
+        public GameObject enterLevel;
+        public GameObject simpleUIPause;
+        public GameObject startPause;
+        public GameObject endLeveld;
+        public GameObject loadMenu;
+        public Slider slider; // add slider to UI to show progress
+        public Text progressText; // text % for progress
+
+        public GameObject movement;
+        public GameObject water;
+
+        // bool activateScene = false;
+
+
+        // private void Start()
+        // {
+        //   timeText.text = PlayerPrefs.GetFloat("TimeLeft").ToString();
+        //   totalTime.text = PlayerPrefs.GetFloat("TotalTime").ToString();
+        //  highScoreText.text = PlayerPrefs.GetFloat("HighScore").ToString();
+        //  timeTextArm.text = PlayerPrefs.GetFloat("TimeLeft").ToString();
+
+        //  }
+
+        void Update()
+        {
+            //SetTimes();
+            // NoTimeLeft();
+            DisplayTime(timeValue);
+            DisplayTotalTime(startTimeValue);
+            DisplayHighTime(highScore);
+
+        }
+
+        private void FixedUpdate()
+        {
+            NoTimeLeft();
+        }
+
+        //  public void LoadLevel(int sceneIndex) // add to button to start loading scene
+        //  {
+        //      StartCoroutine(LoadAsynchronously(sceneIndex));
+        //  }
+        //   public void ActivateScene() //set a button for on click to use in UI
+        //  {
+        //      activateScene = true;
+        //  }
+
+        void DisplayTime(float timeToDisplay)
+        {
+            if (timeToDisplay < 0)
+            {
+                timeToDisplay = 0;
+            }
+            else if (timeToDisplay > 0)
+            {
+                timeToDisplay += 1;
+            }
+
+            float minutes = Mathf.FloorToInt(timeToDisplay / 60);
+            float seconds = Mathf.FloorToInt(timeToDisplay % 60);
+            float millseconds = timeToDisplay % 1 * 1000;
+
+            timeText.text = string.Format("{0:00}:{1:00}:{2:000}", minutes, seconds, millseconds);
+            timeTextArm.text = string.Format("{0:00}:{1:00}:{2:000}", minutes, seconds, millseconds);
+        }
+
+        void DisplayTotalTime(float totaltimeToDisplay)
+        {
+            if (totaltimeToDisplay < 0)
+            {
+                totaltimeToDisplay = 0;
+            }
+            else if (totaltimeToDisplay > 0)
+            {
+                totaltimeToDisplay += 1;
+            }
+
+            float minutes = Mathf.FloorToInt(totaltimeToDisplay / 60);
+            float seconds = Mathf.FloorToInt(totaltimeToDisplay % 60);
+            float millseconds = totaltimeToDisplay % 1 * 1000;
+
+            totalTime.text = string.Format("{0:00}:{1:00}:{2:000}", minutes, seconds, millseconds);
+
+        }
+
+        void DisplayHighTime(float highDisplayTime)
+        {
+            if (highDisplayTime < 0)
+            {
+                highDisplayTime = 0;
+            }
+            else if (highDisplayTime > 0)
+            {
+                highDisplayTime += 1;
+            }
+
+            float minutes = Mathf.FloorToInt(highDisplayTime / 60);
+            float seconds = Mathf.FloorToInt(highDisplayTime % 60);
+            float millseconds = highDisplayTime % 1 * 1000;
+
+            highScoreText.text = string.Format("{0:00}:{1:00}:{2:000}", minutes, seconds, millseconds);
+        }
+
+
+
+        //  IEnumerator LoadAsynchronously(int sceneIndex)
+        //  {
+
+        //    yield return null;
+
+        //     AsyncOperation operation = SceneManager.LoadSceneAsync(sceneIndex); // scene to load from build index #
+        //     operation.allowSceneActivation = false; // set scene as not active
+
+        //     loadingScreen.SetActive(true); // Show UI for loading
+        // timeValue = 120;
+        // startTimeValue = 0;
+
+        //     while (!operation.isDone) //before load is finished loading
+        //     {
+
+        //        float progress = Mathf.Clamp01(operation.progress / .9f); // makes loading bar set to 100%
+        //         slider.value = progress; // sets slider value
+
+        //       progressText.text = progress * 100f + "%"; // text for value, set text in UI
+
+        //      if (progress >= 1f)
+        //      {
+
+        //         enterLevel.SetActive(true); // Show UI for enter level
+        //         if (activateScene == true)
+        //        {
+
+        //              operation.allowSceneActivation = true; //Activate the Scene
+        //          }
+        //     }
+
+        //      yield return null;
+        //     }
+        //   }
+
+        public void NoTimeLeft()
+        {
+            if (timeValue > 0)
+            {
+                timeValue -= (Time.deltaTime);
+                startTimeValue += Time.deltaTime;
+                highScore = startTimeValue;
+                //PlayerPrefs.SetFloat("TotalTime", startTimeValue);
+                // PlayerPrefs.SetFloat("TimeLeft", timeValue);
+
+
+            }
+            else
+            {
+                endLeveld.SetActive(false);
+               // SceneManager.LoadScene(0);
+
+                FlameEngine.instance.PauseFlames();
+                movement.GetComponent<HVRPlayerController>().enabled = false;
+                movement.GetComponent<HVRTeleporter>().enabled = false;
+                water.SetActive(false);
+                loadingScreen.SetActive(true);
+                loadMenu.SetActive(true);
+
+                simpleUIPause.SetActive(true);
+                startPause.SetActive(false);
+
+
+                timeValue = 60;
+                startTimeValue = 0;
+
+
+                //LoadLevel(0);
+                Debug.Log("Time is 0");
+
+
+
+                //  if (highScore > PlayerPrefs.GetFloat("HighScore"))
+                //  {
+                //      PlayerPrefs.SetFloat("HighScore", highScore);
+                //     PlayerPrefs.Save();
+                // highScoreText.text = highScore.ToString();
+                //  }
+            }
+        }
+
+
+    }
+}
+   
+
+    
