@@ -1,0 +1,68 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+namespace Ignis
+{
+    public class LevelLoader : MonoBehaviour
+    {
+        public GameObject loadingScreen; //Add to script to empty object
+        
+        public GameObject enterLevel;
+        public Slider slider; // add slider to UI to show progress
+        public Text progressText; // text % for progress
+
+        bool activateScene = false;
+
+        public int levelGenerate;
+
+
+        private void Start()
+        {
+            levelGenerate = Random.Range(1, 2);
+        }
+        public void LoadLevel(int sceneIndex) // add to button to start loading scene
+        {
+            StartCoroutine(LoadAsynchronously(sceneIndex));
+        }
+
+        IEnumerator LoadAsynchronously(int sceneIndex)
+        {
+
+            yield return null;          
+            FlameEngine.instance.PauseFlames();
+            AsyncOperation operation = SceneManager.LoadSceneAsync(1); // scene to load from build index #
+            operation.allowSceneActivation = false; // set scene as not active
+          
+            loadingScreen.SetActive(true); // Show UI for loading
+
+            while (!operation.isDone) //before load is finished loading
+            {
+                float progress = Mathf.Clamp01(operation.progress / .9f); // makes loading bar set to 100%
+                slider.value = progress; // sets slider value
+
+                progressText.text = progress * 100f + "%"; // text for value, set text in UI
+
+                if (progress >= 1f)
+                {
+                    enterLevel.SetActive(true); // Show UI for enter level
+                    if (activateScene == true)
+                    {
+                        operation.allowSceneActivation = true; //Activate the Scene
+                    }
+                }
+
+                yield return null;
+            }
+        }
+
+        public void ActivateScene() //set a button for on click to use in UI
+        {
+            activateScene = true;
+        }
+
+        
+    }
+}
